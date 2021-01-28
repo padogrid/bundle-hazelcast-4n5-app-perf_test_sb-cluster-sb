@@ -12,7 +12,7 @@ install_bundle -download bundle-hazelcast-4-app-perf_test_sb-cluster-sb
 
 To prepare for encountering cluster split-brain situations, this use case provides step-by-step instructions for creating and monitoring a Hazelcast cluster split-brain. 
 
-![Split-Brain Flow Diagram](/images/split-brain.png)
+![Split-Brain Flow Diagram](images/split-brain.png)
 
 ## Bundle Contents
 
