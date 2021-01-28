@@ -6,20 +6,17 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>padogrid.addon</groupId>
-	<!-- @template: Enter your bundle name here -->
-	<artifactId>bundle-hazelcast-template</artifactId>
+	<artifactId>bundle-hazelcast-4-app-perf_test_sb-cluster-sb</artifactId>
 	<packaging>pom</packaging>
-        <name>${project.artifactId}</name>
+	<name>${project.artifactId}</name>
 	<version>1.0.0</version>
-	<!-- @template: Enter your bundle description -->
-	<description>Bundle template</description>
+	<description>Includes a cluster and an app for testing cluster split-brain</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<hazelcast-addon.version>${project.version}</hazelcast-addon.version>
-                <skipTests>true</skipTests>
 	</properties>
 
 	<repositories>
@@ -34,6 +31,11 @@
 	</repositories>
 
 	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -77,7 +79,7 @@
 				<version>2.5.5</version>
 				<executions>
 					<execution>
-						<id>PadoGrid Bundle</id>
+						<id>Hazelcast 4.1</id>
 						<goals>
 							<goal>attached</goal>
 						</goals>

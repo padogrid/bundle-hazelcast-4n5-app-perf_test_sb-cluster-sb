@@ -1,84 +1,380 @@
-# Hazelcast Bundle Template
+# Cluster Split-Brain
 
-This bundle serves as a template for creating a new Hazelcast onlne bundle.
+This bundle provides scripts, configuration files, and apps for creating a Hazelcast 4.x network split-brain environment where you can test Hazelcast's split-brain capabilities.
 
 ## Installing Bundle
 
-```bash
-install_bundle -download bundle-hazelcast-template
+```console
+install_bundle -download bundle-hazelcast-4-app-perf_test_sb-cluster-sb
 ```
 
 ## Use Case
 
-If you are creating a new online bundle, then you can use this template to create your bundle repo. It includes all the required files with marked annotations for you to quickly start developing a new online bundle. Please follow the steps shown below.
+To prepare for encountering cluster split-brain situations, this use case provides step-by-step instructions for creating and monitoring a Hazelcast cluster split-brain. 
 
-## 1. Create Repo
+![Split-Brain Flow Diagram](/images/split-brain.png)
 
-Select **Use this template** button in the upper right coner to create your repo. Make sure to follow the bundle naming conventions described in the following link.
+## Bundle Contents
 
-## 2. Checkout Repo in Workspace
+This bundle includes the following components.
 
-```bash
-install_bundle -download -workspace <bundle-repo-name>
-switch_workspace <bundle-repo-name>
+- Cluster **sb**. The sb cluster is configured with five (5) VM members running in the `pod_sb` pod. It includes scripts that use `iptables` to drop TCP packets to split the `sb` cluster into two (2). It is configured with split-brain quorum rules for th following maps.
+
+  - `nw/customers`
+  - `nw/orders`
+
+- App **perf_test_sb**. The `perf_test_sb` app is configured to run on a split cluster.
+
+- App **desktop**. The `desktop` app is used to compare data in the split clusters and the merged cluster. It is not included in the bundle because the vanilla desktop works without any modifications. You will be installing the `desktop` app as one of the steps shown in the [Creating Split-Brain](#creating-split-brain) section.
+
+*Note that the `sb` cluster is configured to run in the `pod_sb` pod with its members running as VM hosts and not Vagrant pod hosts.*
+
+## Installation Steps
+
+We will be building the following components as we setup and run the environment.
+
+1. Create pod
+2. Build pod
+3. Build `perf_test_sb`
+4. Build `desktop`
+
+Follow the instructions in the subsequent sections.
+
+### Creating Pod
+
+Create a pod named `pod_sb` with five (5) data nodes. The pod name must be `pod_sb` since the bundle's cluster, `sb`, has been paired with that pod name. Take default values for all but the memory size which you can conserve by reducing it to 1024 MiB as shown in the ouput example below. 
+
+```console
+create_pod -pod pod_sb
 ```
 
-## 3. Update Files
+**Ouput:**
 
-Update the files came with the template repo.
+```console
+Please answer the prompts that appear below. You can abort this command at any time
+by entering 'Ctrl-C'.
 
-- `pom.xml`
-- `assembly-descriptor.xml`
-- `.gitignore`
-- `README_HEADER.md`
-- `README.md` (this file)
-- `README.TEMPLATE` (Remove it when done. See instructions below.)
+Pod name [pod_sb]:
+Primary node name [pnode]:
+Data node name prefix [node]:
+This machine has the following IP addresses. Choose one from the list. The IP address
+must be a private IP address.
+192.168.56.1
+Host private IP address [192.168.56.1]:
+First node IP address' octect [10]:
+Primary node memory size in MiB [2048]: 1024
+Data node memory size in MiB [2048]: 1024
+Number of data nodes  [2]: 5
+Products installation directory path.
+[/Users/dpark/Padogrid/workspaces/rwe-bundles-hazelcast/bundle-hazelcast-4-app-perf_test_sb-cluster-sb/products]:
+/Users/dpark/Padogrid/products/linux
+Vagrant box image [ubuntu/trusty64]:
 
-### 3.1. pom.xml
-
-The `pom.xml` file contains instructions annocated with **@template**. Search **@template** and add your bundle specifics there.
-
-### 3.2 assembly-descriptor.xml
-
-This file creates a tarball that will be deployed when the user executes the `install_bundle -download` command. Search **@template** and add your bundle specfics there.
-
-### 3.3 .gitignore
-
-The `.gitignore` file lists workspace specific files to be excluded from getting checked in. Edit `.gitignore` and add new exludes or remove existing excludes.
-
-```bash
-vi .gitignore
+You have entered the following.
+                       Pod name: pod_sb
+              Primary node name: pnode
+          Data node name prefix: node
+        Host private IP address: 192.168.56.1
+      Node IP addres last octet: 10
+ Primary node memory size (MiB): 1024
+    Data node memory size (MiB): 1024
+                Data node count: 5
+             Products directory: /Users/dpark/Padogrid/products/linux
+              Vagrant box image: ubuntu/trusty64
+Enter 'c' to continue, 'r' to re-enter, 'q' to quit: c
 ```
 
-Make sure to comment out your workspace directories (components) so that they can be included by `git`.
+### Building Pod
+
+Build the pod you just created.
+ 
+```console
+# Build and start the pod
+build_pod -pod pod_sb
+```
+
+### Configuring Cluster
+
+If you changed the default memory size of the primary and data nodes when you created the pod, then you can adjust the Hazelcast member min/max heap size in the `etc/cluster.properties` file as follows:
+
+```console
+switch_cluster sb
+vi etc/cluster.properties
+```
+
+Change the heap min/max sizes in the `etc/cluster.properties` file.
+
+```properties
+# Heap min and max values in etc/cluster.properties
+heap.min=512m
+heap.max=512m
+```
+
+## Creating Split-Brain
+
+### 1. Start cluster and Management Center
+
+Login to `pnode.local` and start the `sb` cluster as follows:
+
+```console
+cd_pod pod_sb
+vagrant ssh
+password: vagrant
+
+# Once logged in to Varant VM, pnode, execute the following:
+switch_cluster sb
+start_cluster
+start_mc
+```
+
+### 2. Monitor Management Center
+
+Enter the following URL in your browser to monitor the Hazelcast cluster from the Management Center.
+
+[http://pnode.local:8080/hazelcast-mancenter](http://pnode.local:8080/hazelcast-mancenter)
+
+### 3. Ingest data - `perf_test_sb`
+
+From your host OS, build `perf_test_sb` and run `test_group` as follows:
+
+```console
+cd_app perf_test_sb; cd bin_sh
+./build_app
+./test_group -prop ../etc/group-factory.properties -run
+```
+
+### 4. View data - `desktop`
+
+From your host OS, install and run the `desktop` app as follows:
+
+```console
+create_app -app desktop -name desktop_sb
+cd_app desktop_sb; cd bin_sh
+./build_app
+cd ../hazelcast-desktop_<version>/bin_sh
+./desktop
+```
+
+You can enter any of the member addresses for the `Locators` text field when you login from the desktop. For example, `node-01.local:5701` connects to the `node-01.local` member. `User Name` is required and can be any name. `Password` is optional and ignored.
+
+```console
+Locators: node-01.local:5701
+App ID: sys
+User Name: foo
+Password: <leave blank>
+```
+
+### 5. Split cluster
+
+From `pnode.local`, run `split_cluster` as follows:
+
+```console
+switch_cluster sb; cd bin_sh
+./split_cluster
+```
+
+To see the `iptables` rules set by `split_cluster`, run `list_rules` as follows:
+
+```console
+./list_rules
+```
+
+### 6. From `pnode.local`, monitor the log files to see the cluster splits into two (2) as follows:
+
+| Cluster | Nodes                                       |
+| ------- | ------------------------------------------- |
+| A       | node-01.local, node-02.local                |
+| B       | node-03.local, node-04.local, node-05.local |
+
+```console
+# See Cluster A (view node-01.local or node-02.local log file)
+show_log
+
+# See Cluster B (view node-03.local, node-04.local, node-05.local log file)
+show_log -num 5
+```
+
+You should see something like the following in the log files:
+
+**Cluster A**
 
 ```console
 ...
-# PadoGrid workspace directories
-apps
-clusters
-docker
-k8s
-pods
+2021-01-28 16:22:04 INFO  ClusterService:180 - [node-01.local]:5701 [dev] [4.1.1]
+
+Members {size:2, ver:8} [
+    Member [node-02.local]:5701 - 851758de-18e4-489d-9caa-7b0fde9d1486
+    Member [node-01.local]:5701 - 131cc2d9-7d4e-4047-87b8-c675f2cfcb4c this
+]
+...
+2021-01-28 16:22:04 WARN  InternalPartitionService:180 - [node-01.local]:5701 [dev] [4.1.1] Following unknown addresses are found in partition table sent from master[[node-02.local]:5701]. (Probably they have recently joined or left the cluster.) {
+    [node-03.local]:5701 - 70b83cf3-26bf-4c59-9ef8-d961839f084d
+    [node-05.local]:5701 - 20b77d72-9c81-496a-b2fd-bda5fa89b6a8
+}
 ...
 ```
 
-## 3.4. README_HEADER.md
+**Cluster B**
 
-Enter a short description of your bundle in the `README_HEADER.md` file. This file content is displayed when you execute the `show_bundle -header` command.
+```console
+...
+2021-01-28 16:22:08 INFO  ClusterService:180 - [node-05.local]:5701 [dev] [4.1.1]
 
-## 3.5. READEME.md (this file)
-
-Replace `README.md` with the README_TEMPLATE.md file. Make sure to remove `README_TEMPLATE.md` after you have replaced `READEME.md` with it.
-
-```bash
-cp README_TEMPLATE.md README.md
-git rm README_TEMPLATE.md
+Members {size:3, ver:6} [
+    Member [node-03.local]:5701 - 70b83cf3-26bf-4c59-9ef8-d961839f084d
+    Member [node-04.local]:5701 - 80f7e869-0b3d-4e2d-8ad0-9164cc1b3844
+    Member [node-05.local]:5701 - 20b77d72-9c81-496a-b2fd-bda5fa89b6a8 this
+]
+...
+2021-01-28 16:22:08 WARN  InternalPartitionService:180 - [node-05.local]:5701 [dev] [4.1.1] Following unknown addresses are found in partition table sent from master[[node-04.local]:5701]. (Probably they have recently joined or left the cluster.) {
+    [node-01.local]:5701 - 131cc2d9-7d4e-4047-87b8-c675f2cfcb4c
+    [node-02.local]:5701 - 851758de-18e4-489d-9caa-7b0fde9d1486
+}
+...
 ```
 
-Update the `READEME.md` file by following the instructions in that file.
+Try refreshing the management center from your browser. You should see the list of members changing sporadically indicating there is a network issue.
 
-## 4. Develop and Test Bundle
+### 7. Ingest data into Cluster B - `perf_test_sb`
 
-You can freely make changes and test the bundle in the workspace. When you are ready to check in, you simply commit the changes using the `git commit` command. For new files, you will need to select only the ones that you want to check in using the `git status -u` and `git diff` commands. For those files that you do not want to check in, you can list them in the `.gitignore` file so that they do not get checked in accidentally.
+From your host OS, run `test_group` which has been preconfigured to connect to Cluster B, i.e., node-03.local, node-04.local, node-05.local (see `etc/hazelcast-client.xml`). `test_group` updates the data that was inserted earlier. We'll compare the new data with the old data in the split clusters.
 
+```console
+cd_app perf_test_sb; cd bin_sh
+./test_group -prop ../etc/group-factory.properties -run
+```
+
+### 8. Compare data between Cluster A and Cluster B
+
+   - Launch desktop and login to Cluster A, e.g., `node-01.local:5701`
+   - Launch desktop and login to Cluster B, e.g., `node-05.local:5701`
+
+```console
+cd_app desktop_sb
+cd hazelcast-desktop_<version>/bin_sh
+
+# Launch two (2) instances of desktop
+
+# login to node-01.local:5701
+./desktop
+
+# login to node-05.local:5701
+./desktop
+```
+
+### 9. Execute queries on both desktop instances
+
+Execute queries on both desktop instances so that we can compare the results later when we merge the clusters.
+
+```console
+--- From each desktop instacne, execute the following queries
+--- (Note that the desktop supports SQL comments):
+select * from nw/customers order by customerId;
+select * from nw/orders order by orderId;
+```
+
+When you execute the above queries you should see the following behavior:
+
+Map          | Cluster A                 | Cluster B     |
+------------ | ------------------------- | ------------- |
+nw/customers | Query Success             | Query Success |
+nw/orders    | Query Failure (Exception) | Query Success |
+
+**Query Exception:** *com.hazelcast.quorum.QuorumException: Split brain protection exception: quorumRuleWithThreeMembers has failed!*
+
+The exception occurs in Cluster A because the split-brain quorum size for the `nw/customers` map is configured with two (2) as shown below (See `etc/hazelcast.xml`). The `nw/orders` map is configured with the the minimum size of 3 but Cluster A now has only 2 members.
+
+```xml
+	<split-brain-protection name="quorumRuleWithTwoMembers" enabled="true">
+		<minimum-cluster-size>2</minimum-cluster-size>
+	</split-brain-protection>
+	<split-brain-protection name="quorumRuleWithThreeMembers" enabled="true">
+		<minimum-cluster-size>3</minimum-cluster-size>
+	</split-brain-protection>
+
+    <map name="nw/customers">
+		<merge-policy batch-size="100">LatestUpdateMergePolicy</merge-policy>
+		<split-brain-protection-ref>quorumRuleWithTwoMembers</split-brain-protection-ref>
+    </map>
+    <map name="nw/orders">
+        <merge-policy batch-size="100">LatestUpdateMergePolicy</merge-policy>
+		<split-brain-protection-ref>quorumRuleWithThreeMembers</split-brain-protection-ref>
+    </map>
+```
+
+You can view the `hazelcast.xml` file as follows:
+
+```console
+cd_cluster sb
+less etc/hazelcast.xml
+```
+
+### 10. Merge clusters
+
+From `pnode.local`, run `merge_cluster` as follows:
+
+```console
+switch_cluster sb; cd bin_sh
+./merge_cluster
+```
+
+### 11. Monitor merged cluster
+
+```console
+show_log
+```
+
+Upon a successful merge, which takes about a minute, you should see something like the following in all the log files:
+
+```console
+...
+2021-01-28 16:55:04 INFO  ClusterService:180 - [node-01.local]:5701 [dev] [4.1.1]
+
+Members {size:5, ver:11} [
+	Member [node-04.local]:5701 - 80f7e869-0b3d-4e2d-8ad0-9164cc1b3844
+	Member [node-05.local]:5701 - 20b77d72-9c81-496a-b2fd-bda5fa89b6a8
+	Member [node-03.local]:5701 - 70b83cf3-26bf-4c59-9ef8-d961839f084d
+	Member [node-02.local]:5701 - 776e0384-a22c-44cb-aa76-3ae70650b989
+	Member [node-01.local]:5701 - abbefe8f-4744-40e3-b632-6ddfd328f0cf this
+]
+...
+```
+
+The management center should also show five (5) members.
+
+### 12. Compare data between the merged cluster and Cluster B
+
+The merged cluster should have the exact same data as Cluster B since both maps are configured with `LatestUpdateMergePolicy`.
+
+From the node-01.local desktop, i.e., Cluster A, re-execute the query, `select * from nw/orders order by orderId`. You should now see the query successfully return results now that the Cluster A and Cluster B are merged into one.
+
+## Tearing Down
+
+### Stop Cluster
+
+From `pnode.local`, execute the following:
+
+```console
+stop_cluster -cluster sb
+stop_mc -cluster sb
+```
+
+### Stop Pod
+
+From your host OS, execute the following:
+
+```console
+stop_pod -pod pod_sb
+```
+
+### Remove Pod
+
+From you host OS, execute the following:
+
+```console
+remove_pod -pod pod_sb
+```
+
+### Close Desktop
+
+Close `desktop` app instances by clicking on the close icon.
