@@ -119,6 +119,7 @@ Login to `pnode.local` and start the `sb` cluster as follows:
 ```console
 cd_pod pod_sb
 vagrant ssh
+# If prompts for password:
 password: vagrant
 
 # Once logged in to Varant VM, pnode, execute the following:
