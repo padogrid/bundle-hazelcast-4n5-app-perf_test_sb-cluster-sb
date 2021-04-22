@@ -68,6 +68,10 @@ Number of data nodes  [2]: 5
 Products installation directory path.
 [/Users/dpark/Padogrid/workspaces/rwe-bundles-hazelcast/bundle-hazelcast-4-app-perf_test_sb-cluster-sb/products]:
 /Users/dpark/Padogrid/products/linux
+Install Avahi? This allows VMs to enable local network discovery service via
+the mDNS/DNS-SD protocol. All VM host names can be looked up with the suffix
+'.local', i.e., pnode.local, node-01.local, etc.
+Enter 'true' or 'false' [false]: true
 Vagrant box image [ubuntu/trusty64]:
 
 You have entered the following.
