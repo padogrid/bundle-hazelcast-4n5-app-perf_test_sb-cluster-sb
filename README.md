@@ -5,7 +5,7 @@ This bundle provides scripts, configuration files, and apps for creating a Hazel
 ## Installing Bundle
 
 ```console
-install_bundle -download bundle-hazelcast-4-app-perf_test_sb-cluster-sb
+install_bundle -download bundle-hazelcast-4n5-app-perf_test_sb-cluster-sb
 ```
 
 ## Use Case
