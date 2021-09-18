@@ -401,14 +401,16 @@ stop_mc -cluster sb
 From your host OS, execute the following:
 
 ```console
+# This stops the VMs. You can restart them by running 'start_pod' later.
 stop_pod -pod pod_sb
 ```
 
 ### Remove Pod
 
-From you host OS, execute the following:
+From your host OS, execute the following:
 
 ```console
+# This removes the Vagrant VMs.
 remove_pod -pod pod_sb
 ```
 
