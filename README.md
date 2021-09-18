@@ -99,6 +99,8 @@ build_pod -pod pod_sb
 
 ### Configuring Cluster
 
+#### Memory
+
 If you changed the default memory size of the primary and data nodes when you created the pod, then you can adjust the Hazelcast member min/max heap size in the `etc/cluster.properties` file as follows:
 
 ```console
@@ -106,12 +108,42 @@ switch_cluster sb
 vi etc/cluster.properties
 ```
 
-Change the heap min/max sizes in the `etc/cluster.properties` file.
+Change the heap min/max sizes in the `etc/cluster.properties` file. The heap size of 512 MB suffices our needs.
 
 ```properties
 # Heap min and max values in etc/cluster.properties
 heap.min=512m
 heap.max=512m
+```
+
+#### hazelcast.xml
+
+:exclamation: Starting Hazelcast 4.2, this element must be set to `true` for `LatestUpdateMergePolicy`. If your Hazelcast version number is less than 4.2 then you must remove the `per-entry-stats-enabled` element from the `hazelcast.xml` file.
+
+```bash
+cd_cluster sb
+vi etc/hazelcast.xml
+```
+
+**hazelcast.xml (4.2 or later):**
+
+```xml
+<hazelcast ...>
+...
+    <merge-policy batch-size="100">LatestUpdateMergePolicy</merge-policy>
+    <per-entry-stats-enabled>true</per-entry-stats-enabled>
+    ...
+</hazelcast>
+```
+
+**hazelcast.xml (4.1.5 or prior):**
+
+```xml
+<hazelcast ...>
+...
+    <merge-policy batch-size="100">LatestUpdateMergePolicy</merge-policy>
+    ...
+</hazelcast>
 ```
 
 ## Creating Split-Brain

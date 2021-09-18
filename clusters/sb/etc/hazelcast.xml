@@ -33,7 +33,7 @@ IMPORTANT:
 <hazelcast xmlns="http://www.hazelcast.com/schema/config"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.hazelcast.com/schema/config
-	http://www.hazelcast.com/schema/config/hazelcast-config-4.0.xsd">
+	http://www.hazelcast.com/schema/config/hazelcast-config-4.2.xsd">
 
 	<properties>
 		<property name="hazelcast.phone.home.enabled">false</property>
@@ -105,11 +105,13 @@ IMPORTANT:
 	</split-brain-protection>
 
     <map name="nw/customers">
-		<merge-policy batch-size="100">LatestUpdateMergePolicy</merge-policy>
-		<split-brain-protection-ref>quorumRuleWithTwoMembers</split-brain-protection-ref>
+	<merge-policy batch-size="100">LatestUpdateMergePolicy</merge-policy>
+	<per-entry-stats-enabled>true</per-entry-stats-enabled>
+	<split-brain-protection-ref>quorumRuleWithTwoMembers</split-brain-protection-ref>
     </map>
     <map name="nw/orders">
         <merge-policy batch-size="100">LatestUpdateMergePolicy</merge-policy>
-		<split-brain-protection-ref>quorumRuleWithThreeMembers</split-brain-protection-ref>
+	<per-entry-stats-enabled>true</per-entry-stats-enabled>
+	<split-brain-protection-ref>quorumRuleWithThreeMembers</split-brain-protection-ref>
     </map>
 </hazelcast>

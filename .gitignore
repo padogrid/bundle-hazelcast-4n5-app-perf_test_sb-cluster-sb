@@ -13,6 +13,10 @@ buildNumber.properties
 # vi
 *.swp
 
+# Eclipse
+.project
+.settings
+
 # PadoGrid workspace
 /.addonenv.sh
 /initenv.sh
@@ -21,6 +25,9 @@ bundles
 lib
 plugins
 run
+.workspace
+.cluster
+workspace.code-workspace
 
 # PadoGrid workspace directories
 #apps
@@ -37,3 +44,4 @@ desktop
 setenv.sh0
 build
 apps/perf_test_sb/results
+apps/desktop_sb
