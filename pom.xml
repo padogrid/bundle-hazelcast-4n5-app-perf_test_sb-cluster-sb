@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>padogrid.addon</groupId>
-	<artifactId>bundle-hazelcast-4-app-perf_test_sb-cluster-sb</artifactId>
+	<artifactId>bundle-hazelcast-4n5-app-perf_test_sb-cluster-sb</artifactId>
 	<packaging>pom</packaging>
 	<name>${project.artifactId}</name>
 	<version>1.0.0</version>
