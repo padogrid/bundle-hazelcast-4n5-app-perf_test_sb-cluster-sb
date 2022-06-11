@@ -14,7 +14,27 @@ To prepare for encountering cluster split-brain situations, this use case provid
 
 ![Split-Brain Flow Diagram](images/split-brain.png)
 
+## Required Software
+
+- [Vagrant](https://www.vagrantup.com/downloads) (1)
+- [VirtualBox](https://www.virtualbox.org/) (1)
+- [Hazelcast Desktop](https://github.com/netcrest/hazelcast-desktop) (2)
+- [Hazelcast OSS](https://hazelcast.com/open-source-projects/downloads/archives/) (3)
+- [Linux JDK](https://www.oracle.com/java/technologies/javase-downloads.html) (3)
+
+1. This bundle uses PadoGrid pods which depend on Vagrant and VirtualBox. If you have not installed them, then please download and install them now by following the links. For details on PadoGrid pods, see [Understanding PadoGrid Pods](https://github.com/padogrid/padogrid/wiki/Understanding-Padogrid-Pods).
+2. Hazelcast Desktop is integrated with PadoGrid. We will install it using `install_padogrid` later.
+3. We need Hazelcast OSS and JDK for Lunx in the VirtualBox VMs. We will install them later.
+
 ## Bundle Contents
+
+```console
+apps
+└── perf_test_sb
+
+clusters
+└── sb
+```
 
 This bundle includes the following components.
 
@@ -25,22 +45,36 @@ This bundle includes the following components.
 
 - App **perf_test_sb**. The `perf_test_sb` app is configured to run on a split cluster.
 
-- App **desktop**. The `desktop` app is used to compare data in the split clusters and the merged cluster. It is not included in the bundle because the vanilla desktop works without any modifications. You will be installing the `desktop` app as one of the steps shown in the [Creating Split-Brain](#creating-split-brain) section.
-
 *Note that the `sb` cluster is configured to run in the `pod_sb` pod with its members running as VM hosts and not Vagrant pod hosts.*
 
 ## Installation Steps
 
-We will be building the following components as we setup and run the environment.
+We will be taking the following steps as we setup and run the environment.
 
-1. Create pod
-2. Build pod
-3. Build `perf_test_sb`
-4. Build `desktop`
+- Install Linux products
+- Create pod
+- Build pod
+- Build `perf_test_sb`
+- Create `desktop`
 
 Follow the instructions in the subsequent sections.
 
-### Creating Pod
+### Install Linux products
+
+We need the following products installed before wen can setup Vagrant VMs. Download their tarball distributions by following the links.
+
+- [Hazelcast OSS](https://hazelcast.com/open-source-projects/downloads/archives/)
+- [Linux JDK](https://www.oracle.com/java/technologies/javase-downloads.html)
+
+Assuming you have installed PadoGrid in the default directory, untar the downloaded tarballs in the `~/Padogrid/products/linux` directory as shown in the example below. If you have installed PadoGrid in a different directory, then make the appriate changes.
+
+```bash
+mkdir ~/Padogrid/products/linux
+tar -C ~/Padogrid/products/linux -xzf  ~/Downloads/jdk-8u333-linux-x64.tar.gz
+tar -C ~/Padogrid/products/linux -xzf  ~/Downloads/hazelcast-5.1.1-slim.tar.gz
+```
+
+### Create pod
 
 Create a pod named `pod_sb` with five (5) data nodes. The pod name must be `pod_sb` since the bundle's cluster, `sb`, has been paired with that pod name. Take default values for all but the memory size which you can conserve by reducing it to 1024 MiB as shown in the ouput example below. The included `sb` cluster has been preconfigured with the member max heap size of 512 MiB.
 
@@ -48,7 +82,19 @@ Create a pod named `pod_sb` with five (5) data nodes. The pod name must be `pod_
 create_pod -pod pod_sb
 ```
 
-**Ouput:**
+**Input:**
+
+Take the default values except for the following prompts.
+
+```console
+Primary node memory size in MiB [2048]: 1024
+Data node memory size in MiB [2048]: 1024
+Number of data nodes  [2]: 5
+Products installation directory path: /Users/dpark/Padogrid/products/linux
+Install Avahi? true
+```
+
+**Output:**
 
 ```console
 Please answer the prompts that appear below. You can abort this command at any time
@@ -88,7 +134,7 @@ You have entered the following.
 Enter 'c' to continue, 'r' to re-enter, 'q' to quit: c
 ```
 
-### Building Pod
+### Build pod
 
 Build the pod you just created.
  
@@ -170,6 +216,10 @@ Enter the following URL in your browser to monitor the Hazelcast cluster from th
 
 [http://pnode.local:8080/hazelcast-mancenter](http://pnode.local:8080/hazelcast-mancenter)
 
+Create a cluster connection to the **dev** cluster using any of the members, i.e., `node-01.local`, `node-02.local`, etc. 
+
+![Management Center Connect Cluster](images/mc-connect-cluster.png)
+
 ### 3. Ingest data - `perf_test_sb`
 
 From your host OS, build `perf_test_sb` and run `test_group` as follows:
@@ -182,13 +232,20 @@ cd_app perf_test_sb; cd bin_sh
 
 ### 4. View data - `desktop`
 
-From your host OS, install and run the `desktop` app as follows:
+#### PadoGrid 
+
+If you haven't installed the Hazelcast Desktop, then install it in your host OS as shown below.
+
+```bash
+install_padogrid -product hazelcast-desktop
+update_padogrid -product hazelcast-desktop
+```
+
+Once installed, create and run the `desktop` app as follows:
 
 ```console
 create_app -app desktop -name desktop_sb
-cd_app desktop_sb; cd bin_sh
-./build_app
-cd ../hazelcast-desktop_<version>/bin_sh
+cd_app desktop_sb/bin_sh
 ./desktop
 ```
 
@@ -287,8 +344,7 @@ cd_app perf_test_sb; cd bin_sh
    - Launch desktop and login to Cluster B, e.g., `node-05.local:5701`
 
 ```console
-cd_app desktop_sb
-cd hazelcast-desktop_<version>/bin_sh
+cd_app desktop_sb/bin_sh
 
 # Launch two (2) instances of desktop
 
@@ -385,11 +441,11 @@ The merged cluster should have the exact same data as Cluster B since both maps 
 
 From the node-01.local desktop, i.e., Cluster A, re-execute the query, `select * from nw/orders order by orderId`. You should now see the query successfully return results now that the Cluster A and Cluster B are merged into one.
 
-## Tearing Down
+## Teardown
 
 ### Stop Cluster
 
-From `pnode.local`, execute the following:
+From your host OS or any of the pods, execute the following:
 
 ```console
 stop_cluster -cluster sb
