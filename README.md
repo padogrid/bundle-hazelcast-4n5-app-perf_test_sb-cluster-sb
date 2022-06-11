@@ -112,7 +112,11 @@ Primary node memory size in MiB [2048]: 1024
 Data node memory size in MiB [2048]: 1024
 Number of data nodes  [2]: 5
 Products installation directory path.
-[/Users/dpark/Padogrid/workspaces/rwe-bundles-hazelcast/bundle-hazelcast-4-app-perf_test_sb-cluster-sb/products]:
+[/Users/dpark/Padogrid/products]:
+/Usres/dpark/Padogrid/products/linux
+Directory does not exist or not a directory.
+Products installation directory path.
+[/Users/dpark/Padogrid/products]:
 /Users/dpark/Padogrid/products/linux
 Install Avahi? This allows VMs to enable local network discovery service via
 the mDNS/DNS-SD protocol. All VM host names can be looked up with the suffix
@@ -130,6 +134,7 @@ You have entered the following.
     Data node memory size (MiB): 1024
                 Data node count: 5
              Products directory: /Users/dpark/Padogrid/products/linux
+                  Avahi enabled: true
               Vagrant box image: ubuntu/trusty64
 Enter 'c' to continue, 'r' to re-enter, 'q' to quit: c
 ```
