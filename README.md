@@ -237,9 +237,7 @@ cd_app perf_test_sb; cd bin_sh
 
 ### 4. View data - `desktop`
 
-#### PadoGrid 
-
-If you haven't installed the Hazelcast Desktop, then install it in your host OS as shown below.
+If you haven't installed the Hazelcast Desktop, then install it on your host OS as shown below.
 
 ```bash
 install_padogrid -product hazelcast-desktop
