@@ -27,7 +27,7 @@ To prepare for encountering cluster split-brain situations, this use case provid
 
 1. This bundle uses PadoGrid pods which depend on Vagrant and VirtualBox. If you have not installed them, then please download and install them now by following the links. For details on PadoGrid pods, see [Understanding PadoGrid Pods](https://github.com/padogrid/padogrid/wiki/Understanding-Padogrid-Pods).
 2. Hazelcast Desktop is integrated with PadoGrid. We will install it using `install_padogrid` later.
-3. We need Hazelcast OSS and JDK for Lunx in the VirtualBox VMs. We will install them later.
+3. We need Hazelcast OSS and JDK for Linux in the VirtualBox VMs. We will install them later.
 
 ## Bundle Contents
 
