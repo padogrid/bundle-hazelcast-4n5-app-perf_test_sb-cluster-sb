@@ -45,3 +45,4 @@ setenv.sh0
 build
 apps/perf_test_sb/results
 apps/desktop_sb
+*.log
