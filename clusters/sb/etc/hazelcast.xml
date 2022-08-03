@@ -41,10 +41,10 @@ IMPORTANT:
 
 	<cluster-name>dev</cluster-name>
 	<!-- To use the workspace cluster name, remove the above line and uncomment 
-	the following line. -->
+		the following line. -->
 	<!-- <cluster-name>${hazelcast-addon.cluster-name}</cluster-name> -->
 
-    <management-center scripting-enabled="true"/>
+	<management-center scripting-enabled="true" />
 
 	<user-code-deployment enabled="true">
 		<class-cache-mode>ETERNAL</class-cache-mode>
@@ -52,8 +52,8 @@ IMPORTANT:
 	</user-code-deployment>
 
 	<network>
-		<!-- padogrid explicitly assigns the TCP port numbers in order to 
-			launch multiple clusters on the same machine. -->
+		<!-- padogrid explicitly assigns the TCP port numbers in order to launch 
+			multiple clusters on the same machine. -->
 		<port auto-increment="false">${hazelcast-addon.tcp.port}</port>
 		<outbound-ports>
 			<!-- Allowed port range when connecting to other nodes. 0 or * means use 
@@ -97,21 +97,23 @@ IMPORTANT:
 		</portable-factories>
 	</serialization>
 
-	<split-brain-protection name="quorumRuleWithTwoMembers" enabled="true">
+	<split-brain-protection
+		name="quorumRuleWithTwoMembers" enabled="true">
 		<minimum-cluster-size>2</minimum-cluster-size>
 	</split-brain-protection>
-	<split-brain-protection name="quorumRuleWithThreeMembers" enabled="true">
+	<split-brain-protection
+		name="quorumRuleWithThreeMembers" enabled="true">
 		<minimum-cluster-size>3</minimum-cluster-size>
 	</split-brain-protection>
 
-    <map name="nw/customers">
-	<merge-policy batch-size="100">LatestUpdateMergePolicy</merge-policy>
-	<per-entry-stats-enabled>true</per-entry-stats-enabled>
-	<split-brain-protection-ref>quorumRuleWithTwoMembers</split-brain-protection-ref>
-    </map>
-    <map name="nw/orders">
-        <merge-policy batch-size="100">LatestUpdateMergePolicy</merge-policy>
-	<per-entry-stats-enabled>true</per-entry-stats-enabled>
-	<split-brain-protection-ref>quorumRuleWithThreeMembers</split-brain-protection-ref>
-    </map>
+	<map name="nw/customers">
+		<merge-policy batch-size="100">LatestUpdateMergePolicy</merge-policy>
+		<per-entry-stats-enabled>true</per-entry-stats-enabled>
+		<split-brain-protection-ref>quorumRuleWithTwoMembers</split-brain-protection-ref>
+	</map>
+	<map name="nw/orders">
+		<merge-policy batch-size="100">LatestUpdateMergePolicy</merge-policy>
+		<per-entry-stats-enabled>true</per-entry-stats-enabled>
+		<split-brain-protection-ref>quorumRuleWithThreeMembers</split-brain-protection-ref>
+	</map>
 </hazelcast>

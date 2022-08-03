@@ -116,10 +116,6 @@ Data node memory size in MiB [2048]: 1024
 Number of data nodes  [2]: 5
 Products installation directory path.
 [/Users/dpark/Padogrid/products]:
-/Usres/dpark/Padogrid/products/linux
-Directory does not exist or not a directory.
-Products installation directory path.
-[/Users/dpark/Padogrid/products]:
 /Users/dpark/Padogrid/products/linux
 Install Avahi? This allows VMs to enable local network discovery service via
 the mDNS/DNS-SD protocol. All VM host names can be looked up with the suffix
