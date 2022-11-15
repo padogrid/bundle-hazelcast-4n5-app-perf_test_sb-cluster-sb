@@ -379,7 +379,17 @@ nw/orders    | Query Failure (Exception) | Query Success |
 
 The exception occurs in Cluster A because the split-brain quorum size for the `nw/customers` map is configured with two (2) as shown below (See `etc/hazelcast.xml`). The `nw/orders` map is configured with the the minimum size of 3 but Cluster A now has only 2 members.
 
+You can view the `hazelcast.xml` file as follows:
+
+```console
+cd_cluster sb
+less etc/hazelcast.xml
+```
+
+Output:
+
 ```xml
+...
 	<split-brain-protection name="quorumRuleWithTwoMembers" enabled="true">
 		<minimum-cluster-size>2</minimum-cluster-size>
 	</split-brain-protection>
@@ -395,13 +405,7 @@ The exception occurs in Cluster A because the split-brain quorum size for the `n
         <merge-policy batch-size="100">LatestUpdateMergePolicy</merge-policy>
 		<split-brain-protection-ref>quorumRuleWithThreeMembers</split-brain-protection-ref>
     </map>
-```
-
-You can view the `hazelcast.xml` file as follows:
-
-```console
-cd_cluster sb
-less etc/hazelcast.xml
+...
 ```
 
 ### 10. Merge clusters
@@ -441,7 +445,7 @@ The management center should also show five (5) members.
 
 The merged cluster should have the exact same data as Cluster B since both maps are configured with `LatestUpdateMergePolicy`.
 
-From the node-01.local desktop, i.e., Cluster A, re-execute the query, `select * from nw/orders order by orderId`. You should now see the query successfully return results now that the Cluster A and Cluster B are merged into one.
+From the node-01.local desktop, i.e., Cluster A, re-execute the query, `select * from nw/orders order by orderId`. You should now see the query successfully returns results now that Cluster A and Cluster B are merged into one.
 
 ## Teardown
 
