@@ -11,6 +11,20 @@
 	<baseDirectory>${project.name}</baseDirectory>
 
 	<fileSets>
+      <!-- Include documents and their image artifacts in the 'bundles/doc' directory
+           so that they can be referenced after the bundle is installed. -->
+		<fileSet>
+         <outputDirectory>bundles/doc/${project.name}</outputDirectory>
+			<includes>
+				<include>*.md</include>
+            <include>images/</include>
+			</includes>
+         <excludes>
+				<exclude>README_HEADER.md</exclude>
+         </excludes>
+		</fileSet>
+
+      <!-- Include bundle components -->
 		<fileSet>
 			<directory>apps</directory>
 			<outputDirectory>apps</outputDirectory>
