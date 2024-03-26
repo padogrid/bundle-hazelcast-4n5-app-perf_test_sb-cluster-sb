@@ -3,7 +3,7 @@
 ---
 
 <!-- Platforms -->
-[![Host OS](https://github.com/padogrid/padogrid/wiki/images/padogrid-host-os.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-Host-OS)
+[![PadoGrid 1.x](https://github.com/padogrid/padogrid/wiki/images/padogrid-padogrid-1.x.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-PadoGrid-1.x) [![Host OS](https://github.com/padogrid/padogrid/wiki/images/padogrid-host-os.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-Host-OS)
 
 # Cluster Split-Brain
 
@@ -78,7 +78,7 @@ Assuming you have installed PadoGrid in the default directory, untar the downloa
 ```bash
 mkdir ~/Padogrid/products/linux
 tar -C ~/Padogrid/products/linux -xzf  ~/Downloads/jdk-8u333-linux-x64.tar.gz
-tar -C ~/Padogrid/products/linux -xzf  ~/Downloads/hazelcast-5.1.1-slim.tar.gz
+tar -C ~/Padogrid/products/linux -xzf  ~/Downloads/hazelcast-5.3.6-slim.tar.gz
 ```
 
 ### Create pod
@@ -172,7 +172,7 @@ heap.max=512m
 
 #### hazelcast.xml
 
-:exclamation: Starting Hazelcast 4.2, this element must be set to `true` for `LatestUpdateMergePolicy`. If your Hazelcast version number is less than 4.2 then you must remove the `per-entry-stats-enabled` element from the `hazelcast.xml` file.
+❗️ Starting Hazelcast 4.2, this element must be set to `true` for `LatestUpdateMergePolicy`. If your Hazelcast version number is less than 4.2 then you must remove the `per-entry-stats-enabled` element from the `hazelcast.xml` file.
 
 ```bash
 cd_cluster sb
@@ -202,7 +202,7 @@ vi etc/hazelcast.xml
 
 ## Creating Split-Brain
 
-### 1. Start cluster and Management Center
+### 1. Start cluster
 
 Login to `pnode.local` and start the `sb` cluster as follows:
 
@@ -215,10 +215,30 @@ password: vagrant
 # Once logged in to Varant VM, pnode, execute the following:
 switch_cluster sb
 start_cluster
-start_mc
 ```
 
-### 2. Monitor Management Center
+### 2. Start Management Center
+
+Hazelcast Management Center allows only three (3) instances of Hazelcast OSS. Since we have five (5) instances, we need a Management Center license key. If you don't have a licene key you can skip this section.
+
+Enter the Management Center license key in the RWE environment file as follows.
+
+```bash
+cd_rwe
+vi .hazelcastenv.sh
+```
+
+Set `MC_LICENSE_KEY` to your license key.
+
+```bash
+MC_LICENSE_KEY=<your license key>
+```
+
+Start Management Center.
+
+```bash
+start_mc
+```
 
 Enter the following URL in your browser to monitor the Hazelcast cluster from the Management Center.
 
